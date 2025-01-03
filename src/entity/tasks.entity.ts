@@ -1,5 +1,5 @@
 import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
-import { Priority, Status } from '../enums/enum';
+import { Priority, Status } from '../shared/enums/enum';
 import { IsNotEmpty, IsEnum, IsString, IsDateString } from 'class-validator';
 
 @Entity()

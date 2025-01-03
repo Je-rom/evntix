@@ -1,6 +1,6 @@
 import * as jwt from 'jsonwebtoken';
 import { Response } from 'express';
-import { User } from '../interface/interface';
+import { User } from '../shared/interface/interface';
 
 if (!process.env.JWT_SECRET) {
   throw new Error('JWT_SECRET is not defined in the environment variables.');

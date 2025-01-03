@@ -4,10 +4,10 @@ import cors from 'cors';
 import path from 'path';
 import session from 'express-session';
 import { taskRouter } from './routes/tasks.router';
-import { authRouter } from './routes/auth.router';
+import { authRouter } from './auth/auth.router';
 import { AppDataSource } from './data-source';
-import { AppError } from './utils/response';
-import globalErrorHandler from './middleware/errorHandling';
+import { AppError } from './shared/utils/response';
+import globalErrorHandler from './shared/middleware/errorHandling';
 import passport from './auth/googleAuth';
 dotenv.config();
 

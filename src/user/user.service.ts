@@ -1,4 +1,4 @@
-import { Auth } from '../entity/auth.entity';
+import { Auth } from '../auth/auth.entity';
 import { AppDataSource } from '../data-source';
 
 export class UserService {

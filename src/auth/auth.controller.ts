@@ -1,9 +1,9 @@
-import { Auth } from '../entity/auth.entity';
+import { Auth } from './auth.entity';
 import { NextFunction, Request, Response } from 'express';
 import { AppDataSource } from '../data-source';
-import { createToken } from '../tokens/jwt.strategy';
-import { hashPassword, comparePassword } from '../utils/password';
-import { AppError } from '../utils/response';
+import { createToken } from './jwt.strategy';
+import { hashPassword, comparePassword } from '../shared/utils/password';
+import { AppError } from '../shared/utils/response';
 
 class AuthController {
   constructor(private userRepository = AppDataSource.getRepository(Auth)) {}

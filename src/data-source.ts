@@ -1,6 +1,6 @@
 import { DataSource } from 'typeorm';
 import { Task } from './entity/tasks.entity';
-import { Auth } from './entity/auth.entity';
+import { Auth } from './auth/auth.entity';
 import dotenv from 'dotenv';
 
 dotenv.config();

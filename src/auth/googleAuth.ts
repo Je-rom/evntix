@@ -1,7 +1,7 @@
 import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
 import passport from 'passport';
 import { Request } from 'express';
-import { userService } from '../service/user.service';
+import { userService } from '../user/user.service';
 
 passport.use(
   new GoogleStrategy(

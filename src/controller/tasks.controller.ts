@@ -2,7 +2,7 @@ import { NextFunction, Request, Response } from 'express';
 import { AppDataSource } from '../data-source';
 import { Task } from '../entity/tasks.entity';
 import { instanceToPlain } from 'class-transformer';
-import { AppError } from '../utils/response';
+import { AppError } from '../shared/utils/response';
 
 class TasksController {
   constructor(private taskRepository = AppDataSource.getRepository(Task)) {}
