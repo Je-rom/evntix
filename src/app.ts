@@ -3,7 +3,6 @@ import express, { Express } from 'express';
 import cors from 'cors';
 import path from 'path';
 import session from 'express-session';
-import { taskRouter } from './routes/tasks.router';
 import { authRouter } from './auth/auth.router';
 import { AppDataSource } from './data-source';
 import { AppError } from './shared/utils/response';
@@ -14,7 +13,7 @@ dotenv.config();
 const app: Express = express();
 const PORT = process.env.PORT || 3000;
 
-app.use(express.json()); //parse json bodies
+app.use(express.json());
 app.use(cors());
 
 //session configuration
@@ -35,7 +34,6 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 //api routes
-app.use('/api/v1/tasks', taskRouter);
 app.use('/api/v1/auth', authRouter);
 
 //google oauth routes

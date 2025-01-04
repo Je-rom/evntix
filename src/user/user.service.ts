@@ -1,14 +1,14 @@
-import { Auth } from '../auth/auth.entity';
+import { User } from './user.entity';
 import { AppDataSource } from '../data-source';
 
 export class UserService {
-  private userRepository = AppDataSource.getRepository(Auth);
+  private userRepository = AppDataSource.getRepository(User);
 
   //find an existing user or create a new one
   public async findOrCreate(
     query: { googleId: string },
-    userDetails: Partial<Auth>,
-  ): Promise<Auth> {
+    userDetails: Partial<User>,
+  ): Promise<User> {
     let user = await this.userRepository.findOne({
       where: { googleId: query.googleId },
     });
@@ -25,7 +25,7 @@ export class UserService {
     return user;
   }
 
-  public async findById(id: string): Promise<Auth | null> {
+  public async findById(id: string): Promise<User | null> {
     return await this.userRepository.findOne({ where: { id } });
   }
 }

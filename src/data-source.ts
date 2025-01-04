@@ -1,6 +1,6 @@
 import { DataSource } from 'typeorm';
-import { Task } from './entity/tasks.entity';
-import { Auth } from './auth/auth.entity';
+import { User } from './user/user.entity';
+import { Event } from './events/event.entity';
 import dotenv from 'dotenv';
 
 dotenv.config();
@@ -13,6 +13,6 @@ export const AppDataSource = new DataSource({
   username: process.env.POSTGRES_USER,
   password: process.env.POSTGRES_PASSWORD,
   database: process.env.POSTGRES_DB,
-  entities: [Task, Auth],
+  entities: [User, Event],
   synchronize: true,
 });

@@ -1,4 +1,4 @@
-import { Auth } from './auth.entity';
+import { User } from '../user/user.entity';
 import { NextFunction, Request, Response } from 'express';
 import { AppDataSource } from '../data-source';
 import { createToken } from './jwt.strategy';
@@ -6,7 +6,7 @@ import { hashPassword, comparePassword } from '../shared/utils/password';
 import { AppError } from '../shared/utils/response';
 
 class AuthController {
-  constructor(private userRepository = AppDataSource.getRepository(Auth)) {}
+  constructor(private userRepository = AppDataSource.getRepository(User)) {}
 
   //signup
   public signUp = async (
@@ -15,7 +15,7 @@ class AuthController {
     next: NextFunction,
   ): Promise<void> => {
     try {
-      const { firstName, secondName, email, password } = req.body;
+      const { first_name, second_name, email, password } = req.body;
 
       //check if user exists
       const existingUser = await this.userRepository.findOne({
@@ -29,8 +29,8 @@ class AuthController {
       const hashedPassword = await hashPassword(password);
       //create user
       const newUser = await this.userRepository.create({
-        firstName,
-        secondName,
+        first_name,
+        second_name,
         email,
         password: hashedPassword,
       });

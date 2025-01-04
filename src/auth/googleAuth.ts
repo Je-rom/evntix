@@ -24,8 +24,8 @@ passport.use(
           { googleId: profile.id },
           {
             email: profile.emails?.[0].value,
-            firstName: profile.name?.givenName,
-            secondName: profile.name?.familyName,
+            first_name: profile.name?.givenName,
+            second_name: profile.name?.familyName,
           },
         );
         return done(null, user);
