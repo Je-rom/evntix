@@ -27,7 +27,7 @@ export class Event {
   @Column({ type: 'date' })
   @IsNotEmpty({ message: 'Event date is required' })
   @IsDateString()
-  date: Date;
+  date: Date 
 
   @Column({ type: 'text' })
   @IsNotEmpty({ message: 'Event location is required' })
