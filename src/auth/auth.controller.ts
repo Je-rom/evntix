@@ -39,7 +39,7 @@ class AuthController {
       const saveUser = await this.userRepository.save(newUser);
 
       //send token, with the user object
-      createToken(saveUser, 201, res);
+      createToken(saveUser, 201, res, 'Registered successfully');
       return;
     } catch (error) {
       console.error('Error signing up user:', error);
@@ -81,7 +81,7 @@ class AuthController {
         email: ifUserExist.email,
       };
       //send token, with the user object
-      createToken(user, 200, res);
+      createToken(user, 200, res, 'Login Succesfull');
       return;
     } catch (error) {
       console.error('Error signing in user:', error);

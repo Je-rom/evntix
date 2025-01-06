@@ -1,6 +1,7 @@
 import * as jwt from 'jsonwebtoken';
 import { Response } from 'express';
 import { User } from '../shared/interface/interface';
+import { AppError } from '../shared/utils/response';
 
 if (!process.env.JWT_SECRET) {
   throw new Error('JWT_SECRET is not defined in the environment variables.');
@@ -19,12 +20,17 @@ const signToken = (id: string) => {
   });
 };
 
-export const createToken = (user: User, statusCode: number, res: Response) => {
+export const createToken = (
+  user: User,
+  statusCode: number,
+  res: Response,
+  message: string,
+) => {
   const jwtToken: string = signToken(user.id);
   const cookieOptions = {
     expires: new Date(Date.now() + cookieExpiresInDays * 24 * 60 * 60 * 1000),
     httpOnly: true,
-    // secure: process.env.NODE_ENV === 'production',
+    secure: process.env.NODE_ENV === 'production',
   };
   res.cookie('jwt', jwtToken, cookieOptions);
 
@@ -33,8 +39,17 @@ export const createToken = (user: User, statusCode: number, res: Response) => {
     statusCode: statusCode,
     status: 'success',
     jwtToken,
-    data: {
+    message,
+    result: {
       user,
     },
   });
+};
+
+export const verifyToken = async (jwtToken: string) => {
+  try {
+    return jwt.verify(jwtToken, secret);
+  } catch (error) {
+    throw new AppError('Invalid token', 400);
+  }
 };

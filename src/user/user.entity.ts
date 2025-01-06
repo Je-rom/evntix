@@ -46,4 +46,7 @@ export class User {
 
   @Column({ type: 'text', nullable: true })
   googleId?: string;
+
+  @Column({ type: 'date', nullable: true })
+  passwordChangedAt: Date;
 }
