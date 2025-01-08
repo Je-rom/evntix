@@ -7,7 +7,7 @@ import {
   MaxLength,
   MinLength,
 } from 'class-validator';
-import { Role } from '../shared/enums/enum';
+import { Role } from '../enums/enum';
 
 @Entity()
 export class User {
@@ -49,4 +49,10 @@ export class User {
 
   @Column({ type: 'date', nullable: true })
   passwordChangedAt: Date;
+
+  @Column({ type: 'text', nullable: true })
+  passwordResetToken?: string;
+
+  @Column({ type: 'date', nullable: true })
+  passwordResetExpires?: Date;
 }

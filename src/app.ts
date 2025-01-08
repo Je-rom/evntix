@@ -5,8 +5,8 @@ import path from 'path';
 import session from 'express-session';
 import { authRouter } from './auth/auth.router';
 import { AppDataSource } from './data-source';
-import { AppError } from './shared/utils/response';
-import globalErrorHandler from './shared/middleware/errorHandling';
+import { AppError } from './utils/response';
+import globalErrorHandler from './middleware/errorHandling';
 import passport from './auth/googleAuth';
 dotenv.config();
 

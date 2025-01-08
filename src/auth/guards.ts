@@ -1,9 +1,9 @@
 import { NextFunction, Request, Response } from 'express';
-import { AppError } from '../shared/utils/response';
+import { AppError } from '../utils/response';
 import jwt, { JwtPayload } from 'jsonwebtoken';
 import { User } from '../user/user.entity';
 import { AppDataSource } from '../data-source';
-import { changedPasswordAfter } from '../shared/utils/password';
+import { changedPasswordAfter } from '../utils/password';
 
 if (!process.env.JWT_SECRET) {
   throw new Error('JWT_SECRET is not defined in the environment variables.');

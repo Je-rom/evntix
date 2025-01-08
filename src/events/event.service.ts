@@ -1,7 +1,7 @@
 import { AppDataSource } from '../data-source';
 import { Event } from './event.entity';
 import { User } from '../user/user.entity';
-import { AppError } from '../shared/utils/response';
+import { AppError } from '../utils/response';
 
 export class EventService {
   constructor(private eventRepository = AppDataSource.getRepository(Event)) {}

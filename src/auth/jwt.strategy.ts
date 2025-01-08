@@ -1,7 +1,9 @@
+import * as dotenv from 'dotenv';
 import * as jwt from 'jsonwebtoken';
 import { Response } from 'express';
-import { User } from '../shared/interface/interface';
-import { AppError } from '../shared/utils/response';
+import { User } from '../interface/interface';
+import { AppError } from '../utils/response';
+dotenv.config();
 
 if (!process.env.JWT_SECRET) {
   throw new Error('JWT_SECRET is not defined in the environment variables.');

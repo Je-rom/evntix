@@ -1,5 +1,5 @@
 import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
-import { EventStatus } from '../shared/enums/enum';
+import { EventStatus } from '../enums/enum';
 import {
   IsDateString,
   IsEnum,

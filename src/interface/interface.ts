@@ -6,3 +6,9 @@ export interface User {
   password?: string;
   //   [key: string]: any;
 }
+
+export interface MailOptions {
+  email: string;
+  subject: string;
+  message: string;
+}

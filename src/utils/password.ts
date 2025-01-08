@@ -1,5 +1,7 @@
 import * as bcrypt from 'bcrypt';
-import { User } from '../../user/user.entity';
+import crypto from 'crypto';
+import { User } from '../user/user.entity';
+
 export const hashPassword = async (password: string): Promise<string> => {
   const saltRounds = 10;
   const hashedPassword = await bcrypt.hash(password, saltRounds);
@@ -24,4 +26,18 @@ export const changedPasswordAfter = async (
     return JWTTimestamp < timePasswordChanged;
   }
   return false;
+};
+
+export const passwordResetToken = async (
+  userData: Partial<User>,
+): Promise<string> => {
+  const resetToken = await crypto.randomBytes(32).toString('hex');
+
+  userData.passwordResetToken = crypto
+    .createHash('sha256')
+    .update(resetToken)
+    .digest('hex');
+  userData.passwordResetExpires = new Date(Date.now() + 10 * 60 * 1000);
+
+  return resetToken;
 };
