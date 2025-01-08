@@ -9,5 +9,5 @@ authRouter.route('/login').post(authController.signIn);
 authRouter.route('/forgot-password').post(authController.forgotPassword);
 authRouter.route('/reset-password/:token').patch(authController.resetPassword);
 authRouter
-  .route('/update-password/:id')
+  .route('/update-password')
   .patch(JwtAuthGuard, authController.updatePassword);

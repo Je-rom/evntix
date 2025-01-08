@@ -22,7 +22,7 @@ export const changedPasswordAfter = async (
 ): Promise<boolean> => {
   const passowrd = userData.passwordChangedAt;
   if (passowrd) {
-    const timePasswordChanged = (passowrd.getTime() / 100, 10);
+    const timePasswordChanged = passowrd.getTime() / 1000;
     return JWTTimestamp < timePasswordChanged;
   }
   return false;

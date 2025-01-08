@@ -4,6 +4,7 @@ import {
   IsEnum,
   IsNotEmpty,
   IsString,
+  Matches,
   MaxLength,
   MinLength,
 } from 'class-validator';
@@ -38,6 +39,10 @@ export class User {
   @IsString({ message: 'Password must be a string' })
   @MinLength(8, { message: 'Password must be at least 8 characters long' })
   @MaxLength(50, { message: 'Password must not exceed 50 characters' })
+  @Matches(/^(?=.*[A-Z])(?=.*[!@#$%^&*(),.?":{}|<>])(?=.*\d).*$/, {
+    message:
+      'Password must contain at least one uppercase letter, one special character, and one number',
+  })
   password?: string;
 
   @Column({ type: 'enum', enum: Role, default: Role.REGULAR_USER })
@@ -55,4 +60,7 @@ export class User {
 
   @Column({ type: 'date', nullable: true })
   passwordResetExpires?: Date;
+
+  @Column({ type: 'boolean', default: true, select: false })
+  active: boolean;
 }

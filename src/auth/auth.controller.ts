@@ -8,9 +8,11 @@ import {
   passwordResetToken,
 } from '../utils/password';
 import { AppError } from '../utils/response';
+import { validateEntity } from '../utils/validation';
 import { NotificationService } from '../notifications/notification.service';
 import crypto from 'crypto';
-
+import { plainToInstance } from 'class-transformer';
+import { RessetPasswordDto } from '../user/dto/resetPassword.dto';
 export class AuthController {
   constructor(
     private userRepository = AppDataSource.getRepository(User),
@@ -24,7 +26,7 @@ export class AuthController {
     next: NextFunction,
   ): Promise<void> => {
     try {
-      const { first_name, second_name, email, password } = req.body;
+      const { first_name, second_name, email, password, role } = req.body;
 
       //check if user exists
       const existingUser = await this.userRepository.findOne({
@@ -35,19 +37,28 @@ export class AuthController {
         throw new AppError('User already exists with that email', 400);
       }
 
-      //hash user password
-      const hashedPassword = await hashPassword(password);
-
-      //create user
-      const newUser = await this.userRepository.create({
+      //use plainToInstance to convert the request body to a validated User instance
+      const userInstance = plainToInstance(User, {
         first_name,
         second_name,
         email,
-        password: hashedPassword,
+        password,
+        role,
       });
+
+      //validate the newUser instance using utility function
+      await validateEntity(userInstance);
+
+      //hash user password
+      const hashedPassword = await hashPassword(password);
+      userInstance.password = hashedPassword;
+
+      //create user
+      const newUser = this.userRepository.create(userInstance);
 
       //save user
       const saveUser = await this.userRepository.save(newUser);
+
       //send token, with the user object
       createToken(saveUser, 201, res, 'Registered successfully');
       return;
@@ -115,16 +126,16 @@ export class AuthController {
         throw new AppError('Please enter your email', 400);
       }
 
-      // check if user exists
+      //check if user exists
       const user = await this.userRepository.findOne({ where: { email } });
       if (!user) {
         throw new AppError('User does not exist', 404);
       }
 
-      // generate token
+      //generate token
       const resetToken = await passwordResetToken(user);
 
-      // send email to user
+      //send email to user
       const resetURL = `${req.protocol}://${req.get('host')}/api/v1/auth/reset-password/${resetToken}`;
       const message = `Forgot password? Make a request with your new password and confirm password to: ${resetURL}.\nIf you didn't make this request, please ignore it.`;
 
@@ -150,6 +161,9 @@ export class AuthController {
     next: NextFunction,
   ) => {
     try {
+      const { password } = req.body;
+
+      //retrieve the user by password reset token
       const userToken = crypto
         .createHash('sha256')
         .update(req.params.token)
@@ -168,16 +182,35 @@ export class AuthController {
           400,
         );
       }
-      user.password = await hashPassword(req.body.password);
+
+      //check if the password is provided
+      if (!password) {
+        throw new AppError('Please provide a new password', 400);
+      }
+
+      //validate the password using plainToInstance
+      const userInstance = plainToInstance(RessetPasswordDto, {
+        password,
+      });
+
+      //validate the password
+      await validateEntity(userInstance);
+
+      //hash the password
+      const hashedPassword = await hashPassword(password);
+
+      //update the user's password
+      user.password = hashedPassword;
       user.passwordResetExpires = undefined;
       user.passwordResetToken = undefined;
+
+      //save the updated user
       await this.userRepository.save(user);
-      createToken(
-        user,
-        201,
-        res,
-        'Your password has been restted successfully',
-      );
+
+      res.status(200).json({
+        message:
+          'Your password has been reset successfully. Please log in again.',
+      });
     } catch (error) {
       next(error);
       return;
@@ -190,25 +223,24 @@ export class AuthController {
     next: NextFunction,
   ) => {
     try {
-      const { id } = req.params;
       const { currentPassword, password: newPassword } = req.body;
 
-      // Check user by their ID
-      const user = await this.userRepository.findOneBy({ id });
+      const user = req.user as User;
+
       if (!user) {
-        throw new AppError('User not found', 400);
+        throw new AppError('User not authenticated', 401);
       }
 
-      // Check if the current password is provided
+      //check if the current password is provided
       if (!currentPassword) {
         throw new AppError('Please provide your current password', 400);
       }
 
       if (!user.password) {
-        throw new AppError('Please provide your  password', 400);
+        throw new AppError('Please provide your new password', 400);
       }
 
-      // Verify the current password
+      //check the current password with the existing users password
       const isPasswordCorrect = await comparePassword(
         currentPassword,
         user.password,
@@ -217,13 +249,22 @@ export class AuthController {
         throw new AppError('Current password is incorrect', 401);
       }
 
-      // Hash the new password before saving
-      user.password = await hashPassword(newPassword);
+      //validate the password using plainToInstance
+      const userInstance = plainToInstance(RessetPasswordDto, {
+        password: newPassword,
+      });
 
-      // Save the updated user information
+      //validate the password
+      await validateEntity(userInstance);
+
+      //hash the new password before saving
+      user.password = await hashPassword(newPassword);
+      user.passwordChangedAt = new Date();
+
+      //save the updated user
       await this.userRepository.save(user);
 
-      // Send response with a new token
+      //send response with a new token
       createToken(
         user,
         200,
