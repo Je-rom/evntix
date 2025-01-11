@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from 'typeorm';
 import { EventStatus } from '../enums/enum';
 import {
   IsDateString,
@@ -8,11 +8,15 @@ import {
   IsString,
   Min,
 } from 'class-validator';
+import { User } from '../user/user.entity';
 
 @Entity()
 export class Event {
   @PrimaryGeneratedColumn('uuid')
   id: string;
+
+  @ManyToOne(() => User)
+  user: User;
 
   @Column({ type: 'text' })
   @IsNotEmpty({ message: 'Event title is required' })
@@ -27,7 +31,7 @@ export class Event {
   @Column({ type: 'date' })
   @IsNotEmpty({ message: 'Event date is required' })
   @IsDateString()
-  date: Date 
+  date: Date;
 
   @Column({ type: 'text' })
   @IsNotEmpty({ message: 'Event location is required' })
@@ -47,4 +51,10 @@ export class Event {
   @IsInt()
   @Min(1, { message: 'Event capacity must be at least 1' })
   capacity: number;
+
+  @Column({ type: 'date' })
+  created_At: Date;
+
+  @Column({ type: 'date' })
+  updated_At: Date;
 }

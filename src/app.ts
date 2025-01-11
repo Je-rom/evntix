@@ -4,6 +4,7 @@ import cors from 'cors';
 import path from 'path';
 import session from 'express-session';
 import { authRouter } from './auth/auth.router';
+import { userRouter } from './user/user.router';
 import { AppDataSource } from './data-source';
 import { AppError } from './utils/response';
 import globalErrorHandler from './middleware/errorHandling';
@@ -35,6 +36,7 @@ app.use(passport.session());
 
 //api routes
 app.use('/api/v1/auth', authRouter);
+app.use('/api/v1/user', userRouter);
 
 //google oauth routes
 app.get(

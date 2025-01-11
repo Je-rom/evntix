@@ -53,7 +53,7 @@ export class User {
   googleId?: string;
 
   @Column({ type: 'date', nullable: true })
-  passwordChangedAt: Date;
+  passwordChangedAt?: Date;
 
   @Column({ type: 'text', nullable: true })
   passwordResetToken?: string;
@@ -61,6 +61,6 @@ export class User {
   @Column({ type: 'date', nullable: true })
   passwordResetExpires?: Date;
 
-  @Column({ type: 'boolean', default: true, select: false })
-  active: boolean;
+  @Column({ type: 'boolean', default: true })
+  active?: boolean;
 }

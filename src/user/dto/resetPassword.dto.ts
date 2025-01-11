@@ -6,7 +6,7 @@ import {
   MaxLength,
 } from 'class-validator';
 
-export class RessetPasswordDto {
+export class ResetPasswordDto {
   @IsNotEmpty({ message: 'Please input your password' })
   @IsString({ message: 'Password must be a string' })
   @MinLength(8, { message: 'Password must be at least 8 characters long' })

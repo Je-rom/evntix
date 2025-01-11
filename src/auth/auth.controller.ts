@@ -12,7 +12,7 @@ import { validateEntity } from '../utils/validation';
 import { NotificationService } from '../notifications/notification.service';
 import crypto from 'crypto';
 import { plainToInstance } from 'class-transformer';
-import { RessetPasswordDto } from '../user/dto/resetPassword.dto';
+import { ResetPasswordDto } from '../user/dto/resetPassword.dto';
 export class AuthController {
   constructor(
     private userRepository = AppDataSource.getRepository(User),
@@ -189,7 +189,7 @@ export class AuthController {
       }
 
       //validate the password using plainToInstance
-      const userInstance = plainToInstance(RessetPasswordDto, {
+      const userInstance = plainToInstance(ResetPasswordDto, {
         password,
       });
 
@@ -250,7 +250,7 @@ export class AuthController {
       }
 
       //validate the password using plainToInstance
-      const userInstance = plainToInstance(RessetPasswordDto, {
+      const userInstance = plainToInstance(ResetPasswordDto, {
         password: newPassword,
       });
 

@@ -1,6 +1,7 @@
 import { User } from './user.entity';
 import { AppDataSource } from '../data-source';
-
+import { AppError } from '../utils/response';
+import { AuthenticatedRequest } from '../interface/interface';
 export class UserService {
   private userRepository = AppDataSource.getRepository(User);
 
@@ -13,7 +14,7 @@ export class UserService {
       where: { googleId: query.googleId },
     });
 
-    //if user does not exist, create a new one
+    //if user does not exist, create a new one: use case for google Oauth
     if (!user) {
       user = this.userRepository.create({
         googleId: query.googleId,
@@ -25,8 +26,82 @@ export class UserService {
     return user;
   }
 
-  public async findById(id: string): Promise<User | null> {
-    return await this.userRepository.findOne({ where: { id } });
+  //find user by id
+  public async findById(id: string): Promise<Partial<User> | null> {
+    const user = await this.userRepository.findOne({ where: { id } });
+    if (user) {
+      user.passwordResetToken = undefined;
+      user.passwordResetExpires = undefined;
+      user.password = undefined;
+      user.passwordChangedAt = undefined;
+    }
+    return user;
+  }
+
+  //find all users
+  public async getAllUser(): Promise<User[] | null> {
+    const user = await this.userRepository.find();
+    if (user) {
+      user.forEach((user: User) => {
+        user.passwordResetToken = undefined;
+        user.passwordResetExpires = undefined;
+        user.password = undefined;
+        user.passwordChangedAt = undefined;
+      });
+    }
+    return user;
+  }
+
+  //get my profile
+  // public async getMyProfile(userId: string): Promise<Partial<User>> {
+  //   const me = await this.userRepository.findOne({
+  //     where: { id: userId },
+  //     select: ['id', 'first_name', 'second_name', 'email', 'active', 'role'],
+  //   });
+
+  //   if (!me) {
+  //     throw new AppError('Profile not found', 404);
+  //   }
+
+  //   return me;
+  // }
+
+  //update user
+  public async updateUser(
+    updateUser: Partial<User>,
+    req: AuthenticatedRequest,
+  ): Promise<Partial<User> | null> {
+    const authenticatedUserId = req.user?.id;
+
+    if (updateUser.id !== authenticatedUserId) {
+      throw new AppError('You can only update your own account', 403);
+    }
+    const existingUser = await this.userRepository.findOne({
+      where: { id: updateUser.id },
+    });
+
+    if (!existingUser) {
+      throw new AppError('User not found', 404);
+    }
+
+    if (updateUser.password || updateUser.role) {
+      throw new AppError('You cant update your password or role', 400);
+    }
+
+    if (!updateUser.id) {
+      throw new AppError('User ID is required', 404);
+    }
+    await this.userRepository.update(updateUser.id, updateUser);
+    const updatedUser = await this.userRepository.findOne({
+      where: { id: updateUser.id },
+    });
+    if (updatedUser) {
+      updatedUser.passwordResetToken = undefined;
+      updatedUser.passwordResetExpires = undefined;
+      updatedUser.password = undefined;
+      updatedUser.passwordChangedAt = undefined;
+    }
+    return updatedUser ? { ...updatedUser } : null;
   }
 }
 

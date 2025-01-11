@@ -13,13 +13,6 @@ export class EventService {
   ): Promise<void> => {
     try {
       const { title, date, event_image } = eventData;
-      //only event planners should create events
-      if (user.role !== 'EVENT_PLANNER') {
-        throw new AppError(
-          'Only event planners are allowed to create an event',
-          400,
-        );
-      }
 
       //check if event already exists
       const ifEventExist = await this.eventRepository.findOne({
