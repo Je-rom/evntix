@@ -1,4 +1,10 @@
-import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  CreateDateColumn,
+  UpdateDateColumn,
+} from 'typeorm';
 import {
   IsEmail,
   IsEnum,
@@ -63,4 +69,10 @@ export class User {
 
   @Column({ type: 'boolean', default: true })
   active?: boolean;
+
+  @CreateDateColumn({ type: 'date' })
+  created_At: Date;
+
+  @UpdateDateColumn({ type: 'date' })
+  updated_At: Date;
 }
