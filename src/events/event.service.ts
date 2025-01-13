@@ -1,18 +1,24 @@
 import { AppDataSource } from '../data-source';
 import { Event } from './event.entity';
-import { User } from '../user/user.entity';
 import { AppError } from '../utils/response';
+import { TicketPrice } from '../tickets/tickets.entity';
+import { EventStatus } from '../enums/enum';
+// import { plainToInstance } from 'class-transformer';
+// import { validateEntity } from '../utils/validation';
 
-export class EventService {
-  constructor(private eventRepository = AppDataSource.getRepository(Event)) {}
+class EventService {
+  constructor(
+    private eventRepository = AppDataSource.getRepository(Event),
+    private ticketPriceRepository = AppDataSource.getRepository(TicketPrice),
+  ) {}
 
   //create event
   public createEvent = async (
-    user: User,
-    eventData: Partial<Event>,
-  ): Promise<void> => {
+    event_data: Partial<Event>,
+    ticket_price: TicketPrice[],
+  ): Promise<Event> => {
     try {
-      const { title, date, event_image } = eventData;
+      const { title, date, event_image, capacity, ...the_rest } = event_data;
 
       //check if event already exists
       const ifEventExist = await this.eventRepository.findOne({
@@ -23,9 +29,16 @@ export class EventService {
       }
 
       //check for correct date
-      const eventDate = date ? new Date(date) : undefined;
-      if (eventDate && eventData < new Date()) {
-        throw new AppError('Event date cannot be in the past', 400);
+      if (date) {
+        const eventDate = new Date(date);
+        if (eventDate < new Date()) {
+          throw new AppError('Event date cannot be in the past', 400);
+        }
+      }
+
+      //check for capactiy
+      if (capacity && capacity < 1) {
+        throw new AppError('Event capacity must be at least 1', 400);
       }
 
       //check for image size
@@ -35,6 +48,62 @@ export class EventService {
           throw new AppError('Image size should not be more than 3MB', 400);
         }
       }
-    } catch (error) {}
+
+      //create event
+      const event = this.eventRepository.create({
+        ...the_rest,
+        title,
+        date,
+        event_image,
+        capacity,
+        status: EventStatus.AVAILABLE,
+        created_At: new Date(),
+        updated_At: new Date(),
+      });
+      //save event
+      const saveEvent = await this.eventRepository.save(event);
+
+      //ticket price should not have a negetive value
+      if (ticket_price && ticket_price.length > 1) {
+        for (const price of ticket_price) {
+          if (price.price < 0) {
+            throw new AppError(
+              'Ticket price must be a non-negative value',
+              400,
+            );
+          }
+          //check for duplicate ticket types
+          const duplicateType =
+            ticket_price.filter((tp) => tp.ticket_type === price.ticket_type)
+              .length > 1;
+          if (duplicateType) {
+            throw new AppError(
+              `Duplicate ticket type "${price.ticket_type}" found for the same event`,
+              400,
+            );
+          }
+
+          const ticketPriceEntity = await this.ticketPriceRepository.create({
+            ...price,
+            event: saveEvent,
+            created_At: new Date(),
+            updated_At: new Date(),
+          });
+          await this.ticketPriceRepository.save(ticketPriceEntity);
+        }
+      }
+
+      return saveEvent;
+    } catch (error) {
+      if (error instanceof AppError) {
+        throw error;
+      }
+      throw new AppError(
+        'An unexpected error occurred while creating the event',
+        500,
+      );
+    }
   };
 }
+
+export const eventService = new EventService();

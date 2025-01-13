@@ -2,7 +2,7 @@ import { User } from './user.entity';
 import { AppDataSource } from '../data-source';
 import { AppError } from '../utils/response';
 import { AuthenticatedRequest } from '../interface/interface';
-export class UserService {
+class UserService {
   private userRepository = AppDataSource.getRepository(User);
 
   //find an existing user or create a new one

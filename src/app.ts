@@ -5,6 +5,7 @@ import path from 'path';
 import session from 'express-session';
 import { authRouter } from './auth/auth.router';
 import { userRouter } from './user/user.router';
+import { eventRouter } from './events/event.router';
 import { AppDataSource } from './data-source';
 import { AppError } from './utils/response';
 import globalErrorHandler from './middleware/errorHandling';
@@ -37,6 +38,7 @@ app.use(passport.session());
 //api routes
 app.use('/api/v1/auth', authRouter);
 app.use('/api/v1/user', userRouter);
+app.use('/api/v1/event', eventRouter);
 
 //google oauth routes
 app.get(

@@ -1,12 +1,9 @@
 import { User } from './user.entity';
-import { UserService } from './user.service';
+import { userService } from './user.service';
 import { NextFunction, Request, Response } from 'express';
 import { AuthenticatedRequest } from '../interface/interface';
-export class UserController {
-  private userService = new UserService();
-  constructor() {
-    this.userService = this.userService;
-  }
+class UserController {
+  private userService = userService;
 
   public findById = async (
     req: Request,

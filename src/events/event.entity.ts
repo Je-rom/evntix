@@ -45,8 +45,7 @@ export class Event {
   @IsString()
   location: string;
 
-  @Column({ type: 'enum', enum: EventStatus, default: EventStatus.PENDING })
-  @IsNotEmpty({ message: 'Event status is required' })
+  @Column({ type: 'enum', enum: EventStatus, default: EventStatus.AVAILABLE })
   @IsEnum(EventStatus)
   status: EventStatus;
 
@@ -54,10 +53,9 @@ export class Event {
   event_image: Buffer;
 
   @Column({ type: 'integer', nullable: true })
-  @IsNotEmpty({ message: 'Event capacity is required' })
   @IsInt()
   @Min(1, { message: 'Event capacity must be at least 1' })
-  capacity: number;
+  capacity?: number;
 
   @CreateDateColumn({ type: 'date' })
   created_At: Date;
