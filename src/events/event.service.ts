@@ -3,8 +3,8 @@ import { Event } from './event.entity';
 import { AppError } from '../utils/response';
 import { TicketPrice } from '../tickets/tickets.entity';
 import { EventStatus } from '../enums/enum';
-// import { plainToInstance } from 'class-transformer';
-// import { validateEntity } from '../utils/validation';
+import { plainToInstance } from 'class-transformer';
+import { validateEntity } from '../utils/validation';
 
 class EventService {
   constructor(
@@ -49,17 +49,21 @@ class EventService {
         }
       }
 
-      //create event
-      const event = this.eventRepository.create({
+      //use plainToInstance to convert the request body to a validated Event instance
+      const eventInstance = plainToInstance(Event, {
         ...the_rest,
         title,
         date,
         event_image,
         capacity,
         status: EventStatus.AVAILABLE,
-        created_At: new Date(),
-        updated_At: new Date(),
       });
+
+      //validate the newUser instance using utility function
+      await validateEntity(eventInstance);
+
+      //create event
+      const event = this.eventRepository.create(eventInstance);
       //save event
       const saveEvent = await this.eventRepository.save(event);
 
