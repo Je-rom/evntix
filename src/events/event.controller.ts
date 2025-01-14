@@ -1,4 +1,3 @@
-import { AppError } from '../utils/response';
 import { eventService } from './event.service';
 import { NextFunction, Request, Response } from 'express';
 
@@ -9,7 +8,7 @@ class EventController {
     req: Request,
     res: Response,
     next: NextFunction,
-  ):Promise<any> => {
+  ): Promise<any> => {
     try {
       //get event data and ticket prices from request body
       const {
@@ -44,11 +43,7 @@ class EventController {
         event: newEvent,
       });
     } catch (error) {
-      if (error instanceof AppError) {
-        return res.status(error.statusCode).json({ message: error.message });
-      }
-
-      return res.status(500).json({ message: 'Internal server error' });
+      next(error);
     }
   };
 }

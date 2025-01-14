@@ -9,13 +9,18 @@ const globalErrorHandler = (
 ): void => {
   console.error('Error:', err);
 
-  const statusCode = err.statusCode || 500;
-  const status = err.status || 'error';
+  const statusCode = err instanceof AppError ? err.statusCode : 500;
+  const status = err instanceof AppError ? err.status : 'error';
+  const message =
+    err instanceof AppError ? err.message : 'An unexpected error occurred';
 
   res.status(statusCode).json({
+    statusCode,
     status,
-    message: err.message || 'An unexpected error occurred',
-    ...(process.env.NODE_ENV === 'development' && { stack: err.stack?.split('\n') }),
+    message,
+    ...(process.env.NODE_ENV === 'development' && {
+      stack: err.stack?.split('\n'),
+    }),
   });
 };
 

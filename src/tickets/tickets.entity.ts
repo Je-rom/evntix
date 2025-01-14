@@ -5,7 +5,7 @@ import {
   ManyToOne,
   UpdateDateColumn,
   CreateDateColumn,
-  Index,
+//   Index,
 } from 'typeorm';
 import { Event } from '../events/event.entity';
 import { TicketType } from '../enums/enum';
@@ -19,7 +19,7 @@ export class TicketPrice {
   @ManyToOne(() => Event, (event) => event.ticket_prices)
   event: Event;
 
-  @Index()
+  //   @Index()
   @Column({ type: 'enum', enum: TicketType })
   @IsNotEmpty({ message: 'Please add a ticket type' })
   @IsEnum(TicketPrice)

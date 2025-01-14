@@ -2,6 +2,7 @@ import { User } from './user.entity';
 import { userService } from './user.service';
 import { NextFunction, Request, Response } from 'express';
 import { AuthenticatedRequest } from '../interface/interface';
+import { AppError } from '../utils/response';
 class UserController {
   private userService = userService;
 
@@ -21,7 +22,7 @@ class UserController {
           user,
         });
       } else {
-        res.status(404).json({ status: false, message: 'User not found' });
+        throw new AppError('User not found', 404);
       }
     } catch (error) {
       next(error);
@@ -35,11 +36,15 @@ class UserController {
   ): Promise<void> => {
     try {
       const allUsers = await this.userService.getAllUser();
-      res.status(200).json({
-        status: true,
-        message: 'Successful',
-        result: allUsers,
-      });
+      if (allUsers) {
+        res.status(200).json({
+          status: true,
+          message: 'Successful',
+          result: allUsers,
+        });
+      } else {
+        throw new AppError(`Couldn't find all the users`, 404);
+      }
     } catch (error) {
       next(error);
     }
@@ -59,9 +64,11 @@ class UserController {
       if (updateUser) {
         res.status(200).json({
           status: true,
-          message: 'User update successfully',
+          message: 'User updated successfully',
           result: updateUser,
         });
+      } else {
+        throw new AppError('User update failed', 400);
       }
     } catch (error) {
       next(error);

@@ -52,7 +52,7 @@ export const JwtAuthGuard = async (
     }
 
     req.user = userWithToken;
-    console.log('user object:', userWithToken);
+    // console.log('user object:', userWithToken);
     next();
   } catch (error) {
     return next(new AppError('Invalid token. Please log in again', 401));
@@ -63,7 +63,7 @@ export const RoleGuard = (requiredRoles: Role[]) => {
   return async (req: Request, res: Response, next: NextFunction) => {
     try {
       const userRole = (req.user as User).role;
-      console.log('role:', userRole);
+      // console.log('role:', userRole);
       if (!userRole || !requiredRoles.includes(userRole)) {
         throw new AppError(
           'You do not have the required permissions to access this resource.',
