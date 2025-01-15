@@ -108,6 +108,12 @@ class EventService {
       );
     }
   };
+
+  //update event
+  public updateEvent = async (event: Partial<Event>) => {
+    //check if event exists
+    const event = await this.eventRepository.findOne({})
+  };
 }
 
 export const eventService = new EventService();
