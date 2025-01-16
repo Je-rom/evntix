@@ -34,6 +34,7 @@ class EventController {
           event_image,
         },
         ticket_prices,
+        next,
       );
 
       //send success response

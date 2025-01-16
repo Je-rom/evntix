@@ -137,13 +137,13 @@ export class AuthController {
 
       //send email to user
       const resetURL = `${req.protocol}://${req.get('host')}/api/v1/auth/reset-password/${resetToken}`;
-      const message = `Forgot password? Make a request with your new password and confirm password to: ${resetURL}.\nIf you didn't make this request, please ignore it.`;
+      const message = `Forgot password? Make a request with your new password and confirm password to: ${resetURL}\nIf you didn't make this request, please ignore it.`;
 
-      await this.notification.sendMail({
-        email: user.email,
-        subject: 'Your password reset token (valid for 10 minutes)',
+      await this.notification.sendEmail(
+        user.email,
+        'Your password reset token (valid for 10 minutes)',
         message,
-      });
+      );
       await this.userRepository.save(user);
       res.status(200).json({
         status: 'success',
@@ -169,16 +169,24 @@ export class AuthController {
         .update(req.params.token)
         .digest('hex');
 
+      //check if user exists and if the token is valid and not expired
       const user = await this.userRepository.findOne({
         where: {
           passwordResetToken: userToken,
-          passwordResetExpires: new Date(),
         },
       });
 
       if (!user) {
         throw new AppError(
-          'Reset Token has expired or it is invalid, try again',
+          'Reset Token is invalid or does not match any user',
+          400,
+        );
+      }
+
+      //check if the token has expired
+      if (user.passwordResetExpires && user.passwordResetExpires < new Date()) {
+        throw new AppError(
+          'Reset Token has expired, please request a new one',
           400,
         );
       }
@@ -201,8 +209,8 @@ export class AuthController {
 
       //update the user's password
       user.password = hashedPassword;
-      user.passwordResetExpires = undefined;
-      user.passwordResetToken = undefined;
+      user.passwordResetExpires = null;
+      user.passwordResetToken = null;
 
       //save the updated user
       await this.userRepository.save(user);

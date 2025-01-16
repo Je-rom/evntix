@@ -58,21 +58,21 @@ export class User {
   @Column({ type: 'text', nullable: true })
   googleId?: string;
 
-  @Column({ type: 'date', nullable: true })
+  @Column({ type: 'timestamp', nullable: true })
   passwordChangedAt?: Date;
 
   @Column({ type: 'text', nullable: true })
-  passwordResetToken?: string;
+  passwordResetToken?: string | null;
 
-  @Column({ type: 'date', nullable: true })
-  passwordResetExpires?: Date;
+  @Column({ type: 'timestamp', nullable: true })
+  passwordResetExpires?: Date | null;
 
   @Column({ type: 'boolean', default: true })
   active?: boolean;
 
-  @CreateDateColumn({ type: 'date' })
+  @CreateDateColumn({ type: 'timestamp' })
   created_At: Date;
 
-  @UpdateDateColumn({ type: 'date' })
+  @UpdateDateColumn({ type: 'timestamp' })
   updated_At: Date;
 }

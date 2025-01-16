@@ -5,7 +5,7 @@ import {
   ManyToOne,
   UpdateDateColumn,
   CreateDateColumn,
-//   Index,
+  //   Index,
 } from 'typeorm';
 import { Event } from '../events/event.entity';
 import { TicketType } from '../enums/enum';
@@ -25,18 +25,18 @@ export class TicketPrice {
   @IsEnum(TicketPrice)
   ticket_type: TicketType;
 
-  @Column({ type: 'decimal', precision: 5, scale: 2 })
+  @Column({ type: 'decimal', precision: 5, scale: 2, nullable: true })
   @IsNotEmpty({ message: 'Please add an amount' })
   @IsDecimal({})
-  price: number;
+  price?: number|undefined ;
 
   @Column({ type: 'text', nullable: true })
   @IsString({ message: 'Day must be a string' })
   day?: string;
 
-  @CreateDateColumn({ type: 'date' })
+  @CreateDateColumn({ type: 'timestamp' })
   created_At: Date;
 
-  @UpdateDateColumn({ type: 'date' })
+  @UpdateDateColumn({ type: 'timestamp' })
   updated_At: Date;
 }

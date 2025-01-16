@@ -1,25 +1,27 @@
 import sgMail from '@sendgrid/mail';
-import nodemailer, { SendMailOptions, Transporter } from 'nodemailer';
-import { MailOptions } from '../interface/interface';
+// import nodemailer, { SendMailOptions, Transporter } from 'nodemailer';
+// import { MailOptions } from '../interface/interface';
 
-if (!process.env.SENDGRID_API_KEY) {
+if (!process.env.eventixTupac) {
   throw new Error('SENDGRID_API_KEY is not defined');
 }
 
 const defaultFromEmail = process.env.DEFAULT_FROM_EMAIL || '';
-sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+sgMail.setApiKey(process.env.eventixTupac);
 
 export class NotificationService {
   public sendEmail = async (
     to: string,
     subject: string,
     text: string,
+    options?: {},
   ): Promise<{ success: boolean; message: string }> => {
     const message = {
       to,
       from: defaultFromEmail,
       subject,
       text,
+      ...options,
     };
 
     try {
@@ -37,23 +39,23 @@ export class NotificationService {
     }
   };
 
-  public sendMail = async (options: MailOptions): Promise<void> => {
-    const transporter: Transporter = nodemailer.createTransport({
-      host: process.env.EMAIL_HOST,
-      port: Number(process.env.EMAIL_PORT),
-      auth: {
-        user: process.env.EMAIL_USERNAME!,
-        pass: process.env.EMAIL_PASSWORD!,
-      },
-    });
+  // public sendMail = async (options: MailOptions): Promise<void> => {
+  //   const transporter: Transporter = nodemailer.createTransport({
+  //     host: process.env.EMAIL_HOST,
+  //     port: Number(process.env.EMAIL_PORT),
+  //     auth: {
+  //       user: process.env.EMAIL_USERNAME!,
+  //       pass: process.env.EMAIL_PASSWORD!,
+  //     },
+  //   });
 
-    const mailOptions: SendMailOptions = {
-      from: 'Evntix<evntix@gmail.com>',
-      to: options.email,
-      subject: options.subject,
-      text: options.message,
-    };
+  //   const mailOptions: SendMailOptions = {
+  //     from: 'Evntix<evntix@gmail.com>',
+  //     to: options.email,
+  //     subject: options.subject,
+  //     text: options.message,
+  //   };
 
-    await transporter.sendMail(mailOptions);
-  };
+  //   await transporter.sendMail(mailOptions);
+  // };
 }

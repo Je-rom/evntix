@@ -1,7 +1,8 @@
 export enum EventStatus {
   AVAILABLE = 'AVAILABLE',
   NOT_AVAILABLE = 'NOT_AVAILABLE',
-  CABCELLED = 'CANCELLED',
+  CANCELLED = 'CANCELLED',
+  FREE = 'FREE',
 }
 
 export enum Role {
@@ -21,4 +22,5 @@ export enum TicketType {
   GROUP_OF_5 = 'GROUP_OF_5',
   GROUP_OF_10 = 'GROUP_OF_10',
   LIVE_STREAM_ACCESS = 'LIVE_STREAM_ACCESS',
+  FREE_TICKET = 'FREE_TICKET',
 }
