@@ -9,7 +9,13 @@ import {
 } from 'typeorm';
 import { Event } from '../events/event.entity';
 import { TicketType } from '../enums/enum';
-import { IsDecimal, IsEnum, IsNotEmpty, IsString } from 'class-validator';
+import {
+  IsDecimal,
+  IsEnum,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+} from 'class-validator';
 
 @Entity()
 export class TicketPrice {
@@ -26,11 +32,13 @@ export class TicketPrice {
   ticket_type: TicketType;
 
   @Column({ type: 'decimal', precision: 5, scale: 2, nullable: true })
+  @IsOptional()
   @IsNotEmpty({ message: 'Please add an amount' })
   @IsDecimal({})
-  price?: number|undefined ;
+  price?: number | undefined;
 
   @Column({ type: 'text', nullable: true })
+  @IsOptional()
   @IsString({ message: 'Day must be a string' })
   day?: string;
 
