@@ -20,3 +20,6 @@ eventRouter
     RoleGuard([Role.EVENT_PLANNER]),
     eventController.updateEvent,
   );
+
+eventRouter.route('/:id').get(JwtAuthGuard, eventController.getEventById);
+eventRouter.route('/').get(JwtAuthGuard, eventController.getAllEvents);

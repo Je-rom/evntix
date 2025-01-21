@@ -62,6 +62,7 @@ class EventController {
         event_image,
         ticket_prices,
         free_ticket,
+        ticket_count,
       } = req.body;
 
       const event_id = req.params.id;
@@ -78,15 +79,51 @@ class EventController {
           event_image,
           ticket_prices,
           free_ticket,
+          ticket_count,
         },
-        ticket_prices,
         next,
+        ticket_prices,
       );
 
       return res.status(200).json({
         status: true,
         message: 'Event updated successfully',
         updatedEvent: updateEvent,
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  getEventById = async (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ): Promise<any> => {
+    try {
+      const id = req.params.id;
+      const event = await this.eventService.getEventById(id, next);
+      return res.status(200).json({
+        status: true,
+        message: 'Event fetched successfully',
+        Event: event,
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  getAllEvents = async (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ): Promise<any> => {
+    try {
+      const allEvents = await this.eventService.getAllEvents(next);
+      return res.status(200).json({
+        status: true,
+        message: 'Event fetched successfully',
+        Event: allEvents,
       });
     } catch (error) {
       next(error);

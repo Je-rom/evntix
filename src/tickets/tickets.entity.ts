@@ -31,7 +31,7 @@ export class TicketPrice {
   @IsEnum(TicketPrice)
   ticket_type: TicketType;
 
-  @Column({ type: 'decimal', precision: 5, scale: 2, nullable: true })
+  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
   @IsOptional()
   @IsNotEmpty({ message: 'Please add an amount' })
   @IsDecimal({})
