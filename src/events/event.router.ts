@@ -12,3 +12,11 @@ eventRouter
     RoleGuard([Role.EVENT_PLANNER]),
     eventController.createEvent,
   );
+
+eventRouter
+  .route('/:id')
+  .patch(
+    JwtAuthGuard,
+    RoleGuard([Role.EVENT_PLANNER]),
+    eventController.updateEvent,
+  );

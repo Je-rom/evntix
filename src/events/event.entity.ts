@@ -14,7 +14,6 @@ import {
   IsNotEmpty,
   IsOptional,
   IsString,
-  Min,
 } from 'class-validator';
 import { TicketPrice } from '../tickets/tickets.entity';
 
@@ -53,16 +52,16 @@ export class Event {
   @Column({ type: 'integer', nullable: true })
   @IsOptional()
   @IsInt()
-  free_ticket_count?: number;
+  free_ticket?: number;
 
   @Column({ type: 'bytea', nullable: true })
-  event_image: Buffer;
+  event_image?: Buffer;
 
   @Column({ type: 'integer', nullable: true })
-  @IsOptional()
-  @IsInt()
-  @Min(1, { message: 'Event capacity must be at least 1' })
-  capacity?: number;
+  ticket_count?: number;
+
+  @Column({ type: 'timestamp', nullable: true })
+  ticket_availability_end_date?: Date;
 
   @CreateDateColumn({ type: 'timestamp' })
   created_At: Date;
