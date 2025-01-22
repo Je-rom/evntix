@@ -5,6 +5,7 @@ import {
   OneToMany,
   CreateDateColumn,
   UpdateDateColumn,
+  ManyToOne,
 } from 'typeorm';
 import { EventStatus } from '../enums/enum';
 import {
@@ -16,11 +17,15 @@ import {
   IsString,
 } from 'class-validator';
 import { TicketPrice } from '../tickets/tickets.entity';
+import { User } from '../user/user.entity';
 
 @Entity()
 export class Event {
   @PrimaryGeneratedColumn('uuid')
   id: string;
+
+  @ManyToOne(() => User, (user) => user.events)
+  user: User;
 
   @Column({ type: 'text' })
   @IsNotEmpty({ message: 'Event title is required' })
@@ -36,6 +41,10 @@ export class Event {
   @IsNotEmpty({ message: 'Event date is required' })
   @IsDateString()
   date: Date;
+
+  @Column({ type: 'time', nullable: false })
+  @IsNotEmpty({ message: 'Time is required' })
+  time: string;
 
   @OneToMany(() => TicketPrice, (ticket_price) => ticket_price.event)
   ticket_prices: TicketPrice[];

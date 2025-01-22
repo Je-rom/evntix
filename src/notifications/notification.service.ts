@@ -14,6 +14,7 @@ export class NotificationService {
     to: string,
     subject: string,
     text: string,
+    html?: string,
     options?: {},
   ): Promise<{ success: boolean; message: string }> => {
     const message = {
@@ -21,6 +22,7 @@ export class NotificationService {
       from: defaultFromEmail,
       subject,
       text,
+      html,
       ...options,
     };
 

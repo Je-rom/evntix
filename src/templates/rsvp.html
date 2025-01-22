@@ -1,0 +1,93 @@
+<!doctype html>
+<html>
+  <head>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+        background-color: #f9f9f9;
+      }
+      .email-container {
+        max-width: 600px;
+        margin: 20px auto;
+        background: #ffffff;
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      }
+      .header {
+        background-color: #4caf50;
+        color: white;
+        padding: 20px;
+        text-align: center;
+        font-size: 24px;
+      }
+      .content {
+        padding: 20px;
+        color: #333333;
+      }
+      .content p {
+        line-height: 1.6;
+        margin: 10px 0;
+      }
+      .button-container {
+        text-align: center;
+        margin: 20px 0;
+      }
+      .rsvp-button {
+        background-color: #4caf50;
+        color: white;
+        padding: 12px 20px;
+        text-decoration: none;
+        border-radius: 4px;
+        font-size: 16px;
+        font-weight: bold;
+      }
+      .rsvp-button:hover {
+        background-color: #45a049;
+      }
+      .footer {
+        text-align: center;
+        padding: 15px;
+        background-color: #f1f1f1;
+        color: #666666;
+        font-size: 14px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="email-container">
+      <div class="header">You're Invited to ${event.title}!</div>
+      <div class="content">
+        <p>Dear ${recipient_email},</p>
+        <p>We are thrilled to invite you to the following event:</p>
+        <p><strong>Event:</strong> ${event.title}</p>
+        <p><strong>Description:</strong> ${event.description}</p>
+        <p><strong>Date:</strong> ${event.date}</p>
+        <p><strong>Time:</strong> ${event.time}</p>
+        <p><strong>Location:</strong> ${event.location}</p>
+        <p>${event.event_image}</p>
+        <p>
+          We would be delighted to have you join us for this special occasion.
+        </p>
+        <p>Please RSVP by clicking the button below:</p>
+        <div class="button-container">
+          <a href="${rsvpLink}" class="rsvp-button">RSVP Now</a>
+        </div>
+        <p>If you have any questions, feel free to contact us.</p>
+        <p>Best regards,<br />The Event Team</p>
+      </div>
+      <div class="footer">
+        <p>
+          &copy;
+          <script>
+            document.write(new Date().getFullYear());
+          </script>
+          Evntix. All rights reserved.
+        </p>
+      </div>
+    </div>
+  </body>
+</html>

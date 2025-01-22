@@ -4,6 +4,7 @@ import {
   Column,
   CreateDateColumn,
   UpdateDateColumn,
+  OneToMany,
 } from 'typeorm';
 import {
   IsEmail,
@@ -15,11 +16,15 @@ import {
   MinLength,
 } from 'class-validator';
 import { Role } from '../enums/enum';
+import { Event } from '../events/event.entity';
 
 @Entity()
 export class User {
   @PrimaryGeneratedColumn('uuid')
   id: string;
+
+  @OneToMany(() => Event, (event) => event.user)
+  events: Event[];
 
   @Column({ type: 'text', unique: true })
   @IsNotEmpty({ message: 'Please input your email' })

@@ -2,6 +2,7 @@ import { User } from './user.entity';
 import { AppDataSource } from '../data-source';
 import { AppError } from '../utils/response';
 import { AuthenticatedRequest } from '../interface/interface';
+import { NextFunction } from 'express';
 class UserService {
   private userRepository = AppDataSource.getRepository(User);
 
@@ -53,18 +54,25 @@ class UserService {
   }
 
   //get my profile
-  // public async getMyProfile(userId: string): Promise<Partial<User>> {
-  //   const me = await this.userRepository.findOne({
-  //     where: { id: userId },
-  //     select: ['id', 'first_name', 'second_name', 'email', 'active', 'role'],
-  //   });
+  public async getMyProfile(
+    req: AuthenticatedRequest,
+    next: NextFunction,
+  ): Promise<Partial<User>> {
+     const authenticatedUserId = req.user?.id;
+     if (!authenticatedUserId) {
+       throw new AppError('User is not authenticated', 401);
+     }
+    const me = await this.userRepository.findOne({
+      where: { id: authenticatedUserId },
+      select: ['id', 'first_name', 'second_name', 'email', 'active', 'role'],
+    });
 
-  //   if (!me) {
-  //     throw new AppError('Profile not found', 404);
-  //   }
+    if (!me) {
+      throw new AppError('Profile not found', 404);
+    }
 
-  //   return me;
-  // }
+    return me;
+  }
 
   //update user
   public async updateUser(

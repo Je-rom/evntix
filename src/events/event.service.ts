@@ -7,19 +7,29 @@ import { plainToInstance } from 'class-transformer';
 import { validateEntity } from '../utils/validation';
 import { NextFunction } from 'express';
 import { EntityManager } from 'typeorm';
+import { AuthenticatedRequest } from '../interface/interface';
+import { NotificationService } from '../notifications/notification.service';
+import path from 'path';
+import fs from 'fs';
 class EventService {
-  constructor(private eventRepository = AppDataSource.getRepository(Event)) {
-    // private ticketPriceRepository = AppDataSource.getRepository(TicketPrice)
-  }
+  constructor(
+    private eventRepository = AppDataSource.getRepository(Event),
+    private notification = new NotificationService(),
+  ) {}
 
   public createEvent = async (
     event_data: Partial<Event>,
     ticket_price: TicketPrice[],
     next: NextFunction,
+    req: AuthenticatedRequest,
   ): Promise<{ event: Event; ticketPrices: TicketPrice[] }> => {
     return AppDataSource.transaction(
       async (transactionalEntityManager: EntityManager) => {
         try {
+          const authenticatedUserId = req.user?.id;
+          if (!authenticatedUserId) {
+            throw new AppError('User is not authenticated', 401);
+          }
           const {
             title,
             date,
@@ -76,8 +86,8 @@ class EventService {
             event_image,
             status: eventStatus,
             free_ticket, //add free ticket count if provided
+            user: { id: authenticatedUserId },
           });
-          console.log('free_ticket:', free_ticket);
 
           //validate the event instance
           await validateEntity(eventInstance);
@@ -163,21 +173,35 @@ class EventService {
   public updateEvent = async (
     event_id: string,
     eventData: Partial<Event>,
+    req: AuthenticatedRequest,
     next: NextFunction,
     ticket_prices?: TicketPrice[],
   ): Promise<{ event: Event; ticketPrices: TicketPrice[] }> => {
     return AppDataSource.transaction(
       async (transactionalEntityManager: EntityManager) => {
         try {
+          const authenticatedUserId = req.user?.id;
+          if (!authenticatedUserId) {
+            throw new AppError('User is not authenticated', 401);
+          }
+
           const existingEvent = await transactionalEntityManager.findOne(
             Event,
             {
               where: { id: event_id },
-              relations: { ticket_prices: true },
+              relations: { ticket_prices: true, user: true },
             },
           );
           if (!existingEvent) {
             throw new AppError('Event not found', 404);
+          }
+
+          //check if the event belongs to the user
+          if (existingEvent.user.id !== authenticatedUserId) {
+            throw new AppError(
+              'Unauthorized access to the event, you can only update your own event',
+              403,
+            );
           }
 
           if (eventData.date) {
@@ -193,6 +217,7 @@ class EventService {
             title: eventData.title || existingEvent.title,
             date: eventData.date || existingEvent.date,
             event_image: eventData.event_image || existingEvent.event_image,
+            time: eventData.time || existingEvent.time,
             status: eventData.status || existingEvent.status,
           });
 
@@ -277,7 +302,9 @@ class EventService {
 
   public getAllEvents = async (next: NextFunction): Promise<Event[]> => {
     try {
-      const allEvents = await this.eventRepository.find();
+      const allEvents = await this.eventRepository.find({
+        relations: { ticket_prices: true },
+      });
       return allEvents;
     } catch (error) {
       console.error('Error during getting all events:', error);
@@ -286,6 +313,161 @@ class EventService {
       }
       throw new AppError(
         'An unexpected error occurred while getting all events',
+        500,
+      );
+    }
+  };
+
+  public getMyEvents = async (
+    req: AuthenticatedRequest,
+    next: NextFunction,
+  ): Promise<Event[]> => {
+    try {
+      const authenticatedUserId = req.user?.id;
+      if (!authenticatedUserId) {
+        throw new AppError('User is not authenticated', 401);
+      }
+
+      const myEvents = await this.eventRepository.find({
+        where: { user: { id: authenticatedUserId } },
+        relations: { ticket_prices: true },
+      });
+      if (!myEvents || myEvents.length === 0) {
+        throw new AppError('No events found for this user', 404);
+      }
+      return myEvents;
+    } catch (error) {
+      console.error('Error during getting your events:', error);
+      if (error instanceof AppError) {
+        next(error);
+      }
+      throw new AppError(
+        'An unexpected error occurred while getting all events',
+        500,
+      );
+    }
+  };
+
+  public rsvpEvent = async (
+    event_data: Partial<Event>,
+    invitees: string[],
+    req: AuthenticatedRequest,
+    next: NextFunction,
+  ): Promise<Event> => {
+    try {
+      const authenticatedUserId = req.user?.id;
+      if (!authenticatedUserId) {
+        throw new AppError('User is not authenticated', 401);
+      }
+      const { title, date, time, description, location, event_image, status } =
+        event_data;
+
+      //check if event already exists
+      const ifEventExist = await this.eventRepository.findOne({
+        where: { title },
+      });
+      if (ifEventExist) {
+        throw new AppError('Event already exists with that title', 400);
+      }
+
+      //check for a valid date
+      if (date) {
+        const eventDate = new Date(date);
+        if (eventDate < new Date()) {
+          throw new AppError('Event date cannot be in the past', 400);
+        }
+      }
+
+      if (event_image) {
+        const maxFiles = 3 * 1024 * 1024;
+        if (event_image.length > maxFiles) {
+          throw new AppError('Image size should not be more than 3MB', 400);
+        }
+      }
+
+      const eventInstance = plainToInstance(Event, {
+        title,
+        date,
+        event_image,
+        time,
+        description,
+        location,
+        status,
+        user: { id: authenticatedUserId },
+      });
+
+      await validateEntity(eventInstance);
+
+      //create and save the event
+      const event = this.eventRepository.create(eventInstance);
+      const savedEvent = await this.eventRepository.save(event);
+
+      if (invitees && invitees.length > 0) {
+        const rsvpDetails = {
+          title: savedEvent.title,
+          description: savedEvent.description,
+          date: savedEvent.date,
+          time: savedEvent.time,
+          location: savedEvent.location,
+          event_image: savedEvent.event_image,
+          link: `http://localhost:3000/rsvp?eventId=${savedEvent.id}`,
+        };
+
+        //read the html template
+        const templatePath = path.join(
+          __dirname,
+          '..',
+          'templates',
+          'rsvp.html',
+        );
+        const template = fs.readFileSync(templatePath, 'utf-8');
+        const htmlContent = template
+          .replace(/\${event\.title}/g, rsvpDetails.title)
+          .replace(/\${event\.description}/g, rsvpDetails.description)
+          .replace(
+            /\${event\.date}/g,
+            rsvpDetails.date
+              ? new Date(rsvpDetails.date).toLocaleDateString()
+              : '',
+          )
+          .replace(/\${event\.time}/g, rsvpDetails.time)
+          .replace(/\${event\.location}/g, rsvpDetails.location)
+          .replace(
+            /\${event\.event_image}/g,
+            rsvpDetails.event_image ? rsvpDetails.event_image.toString() : '',
+          )
+          .replace(/\${rsvpLink}/g, rsvpDetails.link);
+       
+        //send emails concurrently
+        await Promise.all(
+          invitees.map(async (email) => {
+            try {
+              const personalizedHtmlContent = htmlContent.replace(
+                /\${recipient_email}/g,
+                email,
+              );
+              await this.notification.sendEmail(
+                email,
+                `${rsvpDetails.title} INVITATION`,
+                `You're Invited to ${rsvpDetails.title}`,
+                personalizedHtmlContent,
+              );
+            } catch (error) {
+              console.error(`Failed to send email to ${email}:`, error);
+              next(error);
+            }
+          }),
+        );
+      }
+
+      return savedEvent;
+    } catch (error) {
+      console.error('RSVP event error:', error);
+      if (error instanceof AppError) {
+        next(error);
+      }
+      throw new AppError(
+        'An unexpected error occurred while creating RSVP event',
         500,
       );
     }

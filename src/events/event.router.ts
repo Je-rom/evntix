@@ -6,12 +6,30 @@ import { Role } from '../enums/enum';
 export const eventRouter = Router();
 
 eventRouter
+  .route('/myevents')
+  .get(
+    JwtAuthGuard,
+    RoleGuard([Role.EVENT_PLANNER]),
+    eventController.getMyEvents,
+  );
+
+eventRouter
+  .route('/rsvp')
+  .post(
+    JwtAuthGuard,
+    RoleGuard([Role.EVENT_PLANNER]),
+    eventController.createRsvpEvent,
+  );
+
+eventRouter
   .route('/')
   .post(
     JwtAuthGuard,
     RoleGuard([Role.EVENT_PLANNER]),
     eventController.createEvent,
   );
+
+eventRouter.route('/').get(JwtAuthGuard, eventController.getAllEvents);
 
 eventRouter
   .route('/:id')
@@ -22,4 +40,3 @@ eventRouter
   );
 
 eventRouter.route('/:id').get(JwtAuthGuard, eventController.getEventById);
-eventRouter.route('/').get(JwtAuthGuard, eventController.getAllEvents);

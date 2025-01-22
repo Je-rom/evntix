@@ -6,7 +6,7 @@ import { AppError } from '../utils/response';
 class UserController {
   private userService = userService;
 
-  public findById = async (
+  findById = async (
     req: Request,
     res: Response,
     next: NextFunction,
@@ -29,7 +29,7 @@ class UserController {
     }
   };
 
-  public getAllUsers = async (
+  getAllUsers = async (
     req: Request,
     res: Response,
     next: NextFunction,
@@ -50,17 +50,17 @@ class UserController {
     }
   };
 
-  public updatedUser = async (
+  updatedUser = async (
     req: Request,
     res: Response,
     next: NextFunction,
-  ) => {
+  ): Promise<void> => {
     try {
       const user: Partial<User> = req.body;
       const userId = req.params.id;
       user.id = userId;
-      const authReq = req as AuthenticatedRequest;
-      const updateUser = await this.userService.updateUser(user, authReq);
+      const authUser = req as AuthenticatedRequest;
+      const updateUser = await this.userService.updateUser(user, authUser);
       if (updateUser) {
         res.status(200).json({
           status: true,
@@ -75,28 +75,25 @@ class UserController {
     }
   };
 
-  // public getMyProfile = async (
-  //   req: Request,
-  //   res: Response,
-  //   next: NextFunction,
-  // ): Promise<void> => {
-  //   try {
-  //     let userId = (req.user as User)?.id;
-  //     if (!userId) {
-  //       res.status(401).json({ message: 'No user profile found' });
-  //     }
+  public getMyProfile = async (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> => {
+    try {
+      const authUser = req as AuthenticatedRequest;
 
-  //     const userProfile = await this.userService.getMyProfile(userId);
-  //     res.status(200).json({
-  //       status: true,
-  //       message: 'User fetched successfully',
-  //       result: userProfile,
-  //     });
-  //   } catch (error) {
-  //     next(error);
-  //     return;
-  //   }
-  // };
+      const userProfile = await this.userService.getMyProfile(authUser, next);
+      res.status(200).json({
+        status: true,
+        message: 'User fetched successfully',
+        result: userProfile,
+      });
+    } catch (error) {
+      next(error);
+      return;
+    }
+  };
 }
 
 export const userController = new UserController();

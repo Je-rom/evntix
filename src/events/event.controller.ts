@@ -1,15 +1,17 @@
+import { AuthenticatedRequest } from '../interface/interface';
 import { eventService } from './event.service';
 import { NextFunction, Request, Response } from 'express';
 
 class EventController {
   private eventService = eventService;
 
-  public createEvent = async (
+  createEvent = async (
     req: Request,
     res: Response,
     next: NextFunction,
-  ): Promise<any> => {
+  ): Promise<void> => {
     try {
+      const authUser = req as AuthenticatedRequest;
       const {
         title,
         description,
@@ -19,6 +21,7 @@ class EventController {
         event_image,
         ticket_prices,
         free_ticket,
+        time,
       } = req.body;
 
       //create event in the service layer
@@ -31,13 +34,15 @@ class EventController {
           status,
           event_image,
           free_ticket,
+          time,
         },
         ticket_prices,
         next,
+        authUser,
       );
 
       //send success response
-      return res.status(201).json({
+      res.status(201).json({
         status: true,
         message: 'Event created successfully',
         event: newEvent,
@@ -51,8 +56,9 @@ class EventController {
     req: Request,
     res: Response,
     next: NextFunction,
-  ): Promise<any> => {
+  ): Promise<void> => {
     try {
+      const authUser = req as AuthenticatedRequest;
       const {
         title,
         description,
@@ -63,6 +69,7 @@ class EventController {
         ticket_prices,
         free_ticket,
         ticket_count,
+        time,
       } = req.body;
 
       const event_id = req.params.id;
@@ -80,12 +87,14 @@ class EventController {
           ticket_prices,
           free_ticket,
           ticket_count,
+          time,
         },
+        authUser,
         next,
         ticket_prices,
       );
 
-      return res.status(200).json({
+      res.status(200).json({
         status: true,
         message: 'Event updated successfully',
         updatedEvent: updateEvent,
@@ -99,11 +108,11 @@ class EventController {
     req: Request,
     res: Response,
     next: NextFunction,
-  ): Promise<any> => {
+  ): Promise<void> => {
     try {
       const id = req.params.id;
       const event = await this.eventService.getEventById(id, next);
-      return res.status(200).json({
+      res.status(200).json({
         status: true,
         message: 'Event fetched successfully',
         Event: event,
@@ -117,13 +126,70 @@ class EventController {
     req: Request,
     res: Response,
     next: NextFunction,
-  ): Promise<any> => {
+  ): Promise<void> => {
     try {
       const allEvents = await this.eventService.getAllEvents(next);
-      return res.status(200).json({
+      res.status(200).json({
         status: true,
         message: 'Event fetched successfully',
         Event: allEvents,
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  getMyEvents = async (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> => {
+    try {
+      const authReq = req as AuthenticatedRequest;
+      const myEvents = await this.eventService.getMyEvents(authReq, next);
+      res.status(200).json({
+        status: true,
+        message: 'Event fetched successfully',
+        Event: myEvents,
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  createRsvpEvent = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const {
+        title,
+        date,
+        time,
+        description,
+        location,
+        event_image,
+        invitees,
+        status,
+      } = req.body;
+      const authUser = req as AuthenticatedRequest;
+
+      const rsvp = await this.eventService.rsvpEvent(
+        {
+          title,
+          date,
+          time,
+          description,
+          location,
+          event_image,
+          status,
+        },
+        invitees,
+        authUser,
+        next,
+      );
+
+      res.status(200).json({
+        status: true,
+        message: 'RSVP sent successfully',
+        Event: rsvp,
       });
     } catch (error) {
       next(error);
