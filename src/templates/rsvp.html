@@ -3,72 +3,104 @@
   <head>
     <style>
       body {
-        font-family: Arial, sans-serif;
+        font-family: 'Helvetica Neue', Arial, sans-serif;
         margin: 0;
         padding: 0;
-        background-color: #f9f9f9;
+        background-color: #f3f4f6;
       }
       .email-container {
         max-width: 600px;
-        margin: 20px auto;
+        margin: 40px auto;
         background: #ffffff;
-        border: 1px solid #e0e0e0;
-        border-radius: 8px;
+        border-radius: 12px;
         overflow: hidden;
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+        border: 1px solid #e0e0e0;
       }
       .header {
-        background-color: #4caf50;
+        background: linear-gradient(90deg, #4caf50, #81c784);
         color: white;
-        padding: 20px;
+        padding: 30px 20px;
         text-align: center;
-        font-size: 24px;
+        font-size: 28px;
+        font-weight: bold;
       }
       .content {
-        padding: 20px;
+        padding: 25px 20px;
         color: #333333;
+        line-height: 1.8;
+        background-color: #fdfdfd;
       }
       .content p {
-        line-height: 1.6;
-        margin: 10px 0;
+        margin: 15px 0;
+      }
+      .content strong {
+        color: #4caf50;
+      }
+      .highlight-box {
+        background: #e8f5e9;
+        padding: 15px 20px;
+        border-radius: 8px;
+        margin: 15px 0;
+        color: #2e7d32;
+        font-weight: bold;
       }
       .button-container {
         text-align: center;
-        margin: 20px 0;
+        margin: 25px 0;
       }
       .rsvp-button {
         background-color: #4caf50;
         color: white;
-        padding: 12px 20px;
+        padding: 14px 24px;
         text-decoration: none;
-        border-radius: 4px;
+        border-radius: 6px;
         font-size: 16px;
         font-weight: bold;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        transition:
+          background-color 0.3s ease,
+          transform 0.2s ease;
       }
       .rsvp-button:hover {
-        background-color: #45a049;
+        background-color: #43a047;
+        transform: translateY(-3px);
       }
       .footer {
         text-align: center;
-        padding: 15px;
-        background-color: #f1f1f1;
-        color: #666666;
+        padding: 20px;
+        background: #4caf50;
+        color: white;
         font-size: 14px;
+        font-weight: bold;
+        border-top: 4px solid #388e3c;
+      }
+      .footer p {
+        margin: 5px 0;
+        color: #ffffff;
+      }
+      .footer a {
+        color: #ffcc80;
+        text-decoration: none;
+      }
+      .footer a:hover {
+        text-decoration: underline;
       }
     </style>
   </head>
-  <body>
+  <body style="background-color: #eeeeee; padding: 20px">
     <div class="email-container">
       <div class="header">You're Invited to ${event.title}!</div>
       <div class="content">
         <p>Dear ${recipient_email},</p>
         <p>We are thrilled to invite you to the following event:</p>
-        <p><strong>Event:</strong> ${event.title}</p>
-        <p><strong>Description:</strong> ${event.description}</p>
-        <p><strong>Date:</strong> ${event.date}</p>
-        <p><strong>Time:</strong> ${event.time}</p>
-        <p><strong>Location:</strong> ${event.location}</p>
-        <p>${event.event_image}</p>
+        <div class="highlight-box">
+          <p><strong>Event:</strong> ${event.title}</p>
+          <p><strong>Description:</strong> ${event.description}</p>
+          <p><strong>Date:</strong> ${event.date}</p>
+          <p><strong>Time:</strong> ${event.time}</p>
+          <p><strong>Location:</strong> ${event.location}</p>
+        </div>
         <p>
           We would be delighted to have you join us for this special occasion.
         </p>
@@ -80,12 +112,9 @@
         <p>Best regards,<br />The Event Team</p>
       </div>
       <div class="footer">
+        <p>&copy; 2025 Evntix. All rights reserved.</p>
         <p>
-          &copy;
-          <script>
-            document.write(new Date().getFullYear());
-          </script>
-          Evntix. All rights reserved.
+          Have questions? <a href="mailto:support@evntix.com">Contact Us</a>
         </p>
       </div>
     </div>
