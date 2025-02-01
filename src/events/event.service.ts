@@ -354,136 +354,123 @@ class EventService {
     req: AuthenticatedRequest,
     next: NextFunction,
   ): Promise<Event> => {
-    return AppDataSource.transaction(
-      async (transactionalEntityManager: EntityManager) => {
-        try {
-          const authenticatedUserId = req.user?.id;
-          if (!authenticatedUserId) {
-            throw new AppError('User is not authenticated', 401);
-          }
-          const {
-            title,
-            date,
-            time,
-            description,
-            location,
-            event_image,
-            status,
-          } = event_data;
+    try {
+      const authenticatedUserId = req.user?.id;
+      if (!authenticatedUserId) {
+        throw new AppError('User is not authenticated', 401);
+      }
+      const { title, date, time, description, location, event_image, status } =
+        event_data;
 
-          //check if event already exists
-          const ifEventExist = await transactionalEntityManager.findOne(Event, {
-            where: { title },
-          });
-          if (ifEventExist) {
-            throw new AppError('Event already exists with that title', 400);
-          }
+      //check if event already exists
+      const ifEventExist = await transactionalEntityManager.findOne(Event, {
+        where: { title },
+      });
+      if (ifEventExist) {
+        throw new AppError('Event already exists with that title', 400);
+      }
 
-          //check for a valid date
-          if (date) {
-            const eventDate = new Date(date);
-            if (eventDate < new Date()) {
-              throw new AppError('Event date cannot be in the past', 400);
-            }
-          }
-
-          if (event_image) {
-            const maxFiles = 3 * 1024 * 1024;
-            if (event_image.length > maxFiles) {
-              throw new AppError('Image size should not be more than 3MB', 400);
-            }
-          }
-
-          const eventInstance = plainToInstance(Event, {
-            title,
-            date,
-            event_image,
-            time,
-            description,
-            location,
-            status,
-            user: { id: authenticatedUserId },
-          });
-
-          await validateEntity(eventInstance);
-
-          //create and save the event
-          const event = transactionalEntityManager.create(Event, eventInstance);
-          const savedEvent = await transactionalEntityManager.save(event);
-
-          if (invitees && invitees.length > 0) {
-            const rsvpDetails = {
-              title: savedEvent.title,
-              description: savedEvent.description,
-              date: savedEvent.date,
-              time: savedEvent.time,
-              location: savedEvent.location,
-              event_image: savedEvent.event_image,
-              link: `http://localhost:3000/rsvp?eventId=${savedEvent.id}`,
-            };
-
-            //read the html template
-            const templatePath = path.join(
-              __dirname,
-              '..',
-              'templates',
-              'rsvp.html',
-            );
-            const template = fs.readFileSync(templatePath, 'utf-8');
-            const htmlContent = template
-              .replace(/\${event\.title}/g, rsvpDetails.title)
-              .replace(/\${event\.description}/g, rsvpDetails.description)
-              .replace(
-                /\${event\.date}/g,
-                rsvpDetails.date
-                  ? new Date(rsvpDetails.date).toLocaleDateString()
-                  : '',
-              )
-              .replace(/\${event\.time}/g, rsvpDetails.time)
-              .replace(/\${event\.location}/g, rsvpDetails.location)
-              .replace(
-                /\${event\.event_image}/g,
-                rsvpDetails.event_image
-                  ? rsvpDetails.event_image.toString()
-                  : '',
-              )
-              .replace(/\${rsvpLink}/g, rsvpDetails.link);
-
-            //send emails concurrently
-            await Promise.all(
-              invitees.map(async (email) => {
-                try {
-                  const personalizedHtmlContent = htmlContent.replace(
-                    /\${recipient_email}/g,
-                    email,
-                  );
-                  await this.notification.sendEmail(
-                    email,
-                    `${rsvpDetails.title} INVITATION`,
-                    `You're Invited to ${rsvpDetails.title}`,
-                    personalizedHtmlContent,
-                  );
-                } catch (error) {
-                  console.error(`Failed to send email to ${email}:`, error);
-                  next(error);
-                }
-              }),
-            );
-          }
-
-          return savedEvent;
-        } catch (error) {
-          console.error('RSVP event error:', error);
-          if (error instanceof AppError) {
-            next(error);
-          }
-          throw new AppError(
-            'An unexpected error occurred while creating RSVP event',
-            500,
-          );
+      //check for a valid date
+      if (date) {
+        const eventDate = new Date(date);
+        if (eventDate < new Date()) {
+          throw new AppError('Event date cannot be in the past', 400);
         }
-      },
-    );
+      }
+
+      if (event_image) {
+        const maxFiles = 3 * 1024 * 1024;
+        if (event_image.length > maxFiles) {
+          throw new AppError('Image size should not be more than 3MB', 400);
+        }
+      }
+
+      const eventInstance = plainToInstance(Event, {
+        title,
+        date,
+        event_image,
+        time,
+        description,
+        location,
+        status,
+        user: { id: authenticatedUserId },
+      });
+
+      await validateEntity(eventInstance);
+
+      //create and save the event
+      const event = transactionalEntityManager.create(Event, eventInstance);
+      const savedEvent = await transactionalEntityManager.save(event);
+
+      if (invitees && invitees.length > 0) {
+        const rsvpDetails = {
+          title: savedEvent.title,
+          description: savedEvent.description,
+          date: savedEvent.date,
+          time: savedEvent.time,
+          location: savedEvent.location,
+          event_image: savedEvent.event_image,
+          link: `http://localhost:3000/rsvp?eventId=${savedEvent.id}`,
+        };
+
+        //read the html template
+        const templatePath = path.join(
+          __dirname,
+          '..',
+          'templates',
+          'rsvp.html',
+        );
+        const template = fs.readFileSync(templatePath, 'utf-8');
+        const htmlContent = template
+          .replace(/\${event\.title}/g, rsvpDetails.title)
+          .replace(/\${event\.description}/g, rsvpDetails.description)
+          .replace(
+            /\${event\.date}/g,
+            rsvpDetails.date
+              ? new Date(rsvpDetails.date).toLocaleDateString()
+              : '',
+          )
+          .replace(/\${event\.time}/g, rsvpDetails.time)
+          .replace(/\${event\.location}/g, rsvpDetails.location)
+          .replace(
+            /\${event\.event_image}/g,
+            rsvpDetails.event_image ? rsvpDetails.event_image.toString() : '',
+          )
+          .replace(/\${rsvpLink}/g, rsvpDetails.link);
+
+        //send emails concurrently
+        await Promise.all(
+          invitees.map(async (email) => {
+            try {
+              const personalizedHtmlContent = htmlContent.replace(
+                /\${recipient_email}/g,
+                email,
+              );
+              await this.notification.sendEmail(
+                email,
+                `${rsvpDetails.title} INVITATION`,
+                `You're Invited to ${rsvpDetails.title}`,
+                personalizedHtmlContent,
+              );
+            } catch (error) {
+              console.error(`Failed to send email to ${email}:`, error);
+              next(error);
+            }
+          }),
+        );
+      }
+
+      return savedEvent;
+    } catch (error) {
+      console.error('RSVP event error:', error);
+      if (error instanceof AppError) {
+        next(error);
+      }
+      throw new AppError(
+        'An unexpected error occurred while creating RSVP event',
+        500,
+      );
+    }
   };
 }
 
