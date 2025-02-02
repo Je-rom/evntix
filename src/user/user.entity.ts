@@ -17,6 +17,7 @@ import {
 } from 'class-validator';
 import { Role } from '../enums/enum';
 import { Event } from '../events/event.entity';
+import { Payment } from '../payments/payments.entity';
 
 @Entity()
 export class User {
@@ -25,6 +26,9 @@ export class User {
 
   @OneToMany(() => Event, (event) => event.user)
   events: Event[];
+
+  @OneToMany(() => Payment, (payment) => payment.user)
+  payments: Payment[];
 
   @Column({ type: 'text', unique: true })
   @IsNotEmpty({ message: 'Please input your email' })

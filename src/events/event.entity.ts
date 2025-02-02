@@ -18,6 +18,7 @@ import {
 } from 'class-validator';
 import { TicketPrice } from '../tickets/tickets.entity';
 import { User } from '../user/user.entity';
+import { Payment } from '../payments/payments.entity';
 
 @Entity()
 export class Event {
@@ -26,6 +27,12 @@ export class Event {
 
   @ManyToOne(() => User, (user) => user.events)
   user: User;
+
+  @OneToMany(() => TicketPrice, (ticket_price) => ticket_price.event)
+  ticket_prices: TicketPrice[];
+
+  @OneToMany(() => Payment, (payment) => payment.event)
+  payments: Payment[];
 
   @Column({ type: 'text' })
   @IsNotEmpty({ message: 'Event title is required' })
@@ -45,9 +52,6 @@ export class Event {
   @Column({ type: 'time', nullable: false })
   @IsNotEmpty({ message: 'Time is required' })
   time: string;
-
-  @OneToMany(() => TicketPrice, (ticket_price) => ticket_price.event)
-  ticket_prices: TicketPrice[];
 
   @Column({ type: 'text' })
   @IsNotEmpty({ message: 'Event location is required' })

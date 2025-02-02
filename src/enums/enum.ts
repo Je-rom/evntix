@@ -24,3 +24,17 @@ export enum TicketType {
   LIVE_STREAM_ACCESS = 'LIVE_STREAM_ACCESS',
   FREE_TICKET = 'FREE_TICKET',
 }
+
+export enum PaymentStatus {
+  PENDING = 'PENDING',
+  SUCCESS = 'SUCCESS',
+  FAILED = 'FAILED',
+  ABANDONED = 'ABANDONED',
+  REFUNDED = 'REFUNDED',
+}
+
+export enum WebhookStatus {
+  PENDING = 'PENDING',
+  RECEIVED = 'RECEIVED',
+  FAILED = 'FAILED',
+}

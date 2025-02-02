@@ -5,6 +5,7 @@ import {
   ManyToOne,
   UpdateDateColumn,
   CreateDateColumn,
+  OneToMany,
   //   Index,
 } from 'typeorm';
 import { Event } from '../events/event.entity';
@@ -16,6 +17,7 @@ import {
   IsOptional,
   IsString,
 } from 'class-validator';
+import { Payment } from '../payments/payments.entity';
 
 @Entity()
 export class TicketPrice {
@@ -25,10 +27,13 @@ export class TicketPrice {
   @ManyToOne(() => Event, (event) => event.ticket_prices)
   event: Event;
 
+  @OneToMany(() => Payment, (payment) => payment.ticket)
+  payments: Payment[];
+
   //   @Index()
   @Column({ type: 'enum', enum: TicketType })
   @IsNotEmpty({ message: 'Please add a ticket type' })
-  @IsEnum(TicketPrice)
+  @IsEnum(TicketType)
   ticket_type: TicketType;
 
   @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })

@@ -363,7 +363,7 @@ class EventService {
         event_data;
 
       //check if event already exists
-      const ifEventExist = await transactionalEntityManager.findOne(Event, {
+      const ifEventExist = await this.eventRepository.findOne({
         where: { title },
       });
       if (ifEventExist) {
@@ -399,8 +399,8 @@ class EventService {
       await validateEntity(eventInstance);
 
       //create and save the event
-      const event = transactionalEntityManager.create(Event, eventInstance);
-      const savedEvent = await transactionalEntityManager.save(event);
+      const event = this.eventRepository.create(eventInstance);
+      const savedEvent = await this.eventRepository.save(event);
 
       if (invitees && invitees.length > 0) {
         const rsvpDetails = {
