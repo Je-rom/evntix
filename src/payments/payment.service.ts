@@ -51,6 +51,22 @@ export class PaymentService {
       throw new AppError('Ticket does not exist', 404);
     }
 
+    //check if payment exist
+    const paymentExist = await this.paymentRepository.findOne({
+      where: {
+        user: existingUser,
+        event: eventExist,
+        ticket: ticketExist,
+        status: PaymentStatus.PENDING,
+      },
+    });
+    if (paymentExist) {
+      throw new AppError(
+        'You already have a pending payment for this ticket.',
+        400,
+      );
+    }
+
     //payment amount
     const amount = ticketExist.price ? ticketExist.price * 100 : 0;
     //generate a unique reference
