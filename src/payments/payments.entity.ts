@@ -36,8 +36,11 @@ export class Payment {
   @Column({ type: 'text', unique: true })
   paystack_reference: string;
 
-  @Column({ type: 'jsonb', nullable: true })
-  paystack_response?: Record<string, any>;
+  @Column({ type: 'text', nullable: true })
+  paystack_transaction_id?: string;
+
+  @Column({ type: 'text', nullable: true })
+  paystack_status?: string;
 
   @Column({ type: 'jsonb', nullable: true })
   webhook_payload?: Record<string, any>;

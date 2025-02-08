@@ -3,8 +3,12 @@ import { AppDataSource } from '../data-source';
 import { AppError } from '../utils/response';
 import { AuthenticatedRequest } from '../interface/interface';
 import { NextFunction } from 'express';
+import { Repository } from 'typeorm';
 class UserService {
-  private userRepository = AppDataSource.getRepository(User);
+  private userRepository: Repository<User>;
+  constructor() {
+    this.userRepository = AppDataSource.getRepository(User);
+  }
 
   //find an existing user or create a new one
   public async findOrCreate(
@@ -58,10 +62,10 @@ class UserService {
     req: AuthenticatedRequest,
     next: NextFunction,
   ): Promise<Partial<User>> {
-     const authenticatedUserId = req.user?.id;
-     if (!authenticatedUserId) {
-       throw new AppError('User is not authenticated', 401);
-     }
+    const authenticatedUserId = req.user?.id;
+    if (!authenticatedUserId) {
+      throw new AppError('User is not authenticated', 401);
+    }
     const me = await this.userRepository.findOne({
       where: { id: authenticatedUserId },
       select: ['id', 'first_name', 'second_name', 'email', 'active', 'role'],

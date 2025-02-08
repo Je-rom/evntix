@@ -6,16 +6,19 @@ import { EventStatus, TicketType } from '../enums/enum';
 import { plainToInstance } from 'class-transformer';
 import { validateEntity } from '../utils/validation';
 import { NextFunction } from 'express';
-import { EntityManager } from 'typeorm';
+import { EntityManager, Repository } from 'typeorm';
 import { AuthenticatedRequest } from '../interface/interface';
 import { NotificationService } from '../notifications/notification.service';
 import path from 'path';
 import fs from 'fs';
 class EventService {
-  constructor(
-    private eventRepository = AppDataSource.getRepository(Event),
-    private notification = new NotificationService(),
-  ) {}
+  private eventRepository: Repository<Event>;
+  private notification: NotificationService;
+
+  constructor() {
+    this.eventRepository = AppDataSource.getRepository(Event);
+    this.notification = new NotificationService();
+  }
 
   public createEvent = async (
     event_data: Partial<Event>,
